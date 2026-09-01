@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sticker Label Generator – 3cm x 5.5cm</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+  <!-- Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon">🏷️</div>
+        <div>
+          <h1>Sticker Label Generator</h1>
+          <p class="brand-sub">Bio-degradable · 50mm × 30mm · Arial 16</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-ghost" id="addStickerBtn">+ Manual Add</button>
+        <button class="btn btn-pdf" id="downloadPdfBtn">⬇️ Download PDF</button>
+        <button class="btn btn-primary" id="printAllBtn">🖨️ Print All</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-layout">
+
+    <!-- LEFT PANEL -->
+    <aside class="editor-panel">
+
+      <!-- ── EXCEL IMPORT SECTION ── -->
+      <div class="import-section">
+        <div class="import-title">📂 Import from Excel</div>
+        <div class="import-drop" id="importDrop">
+          <input type="file" id="excelFileInput" accept=".xlsx,.xls" hidden/>
+          <div class="drop-icon">📊</div>
+          <div class="drop-text">Drop Excel file here or <span class="drop-link" id="dropClickArea">Browse</span></div>
+          <div class="drop-hint">Reads Sheet1 · PLACEMENT PRINT / AOP PRINT · COLOR · Size columns</div>
+        </div>
+        <div class="import-result" id="importResult" style="display:none">
+          <div class="ir-icon">✅</div>
+          <div class="ir-info">
+            <div class="ir-filename" id="irFilename"></div>
+            <div class="ir-count" id="irCount"></div>
+          </div>
+          <button class="btn-tiny" id="clearImportBtn">✕ Clear</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ── MANUAL ENTRY ── -->
+      <div class="panel-header">
+        <h2>✏️ Manual Entry</h2>
+        <span class="badge" id="stickerCountBadge">0 stickers</span>
+      </div>
+
+      <div class="form-group">
+        <label for="styleNameInput">Style Name</label>
+        <input type="text" id="styleNameInput" placeholder="e.g. JOINED AT THE HIP" maxlength="60"/>
+        <span class="char-hint">Will be shown in UPPERCASE</span>
+      </div>
+
+      <div class="form-group">
+        <label for="colourInput">Colour</label>
+        <input type="text" id="colourInput" placeholder="e.g. Dark Navy"/>
+      </div>
+
+      <div class="form-group">
+        <label for="sizeInput">Size</label>
+        <input type="text" id="sizeInput" placeholder="e.g. 5-6Y or 3M"/>
+        <div class="size-chips">
+          <button class="chip" data-val="0-3M">0-3M</button>
+          <button class="chip" data-val="3-6M">3-6M</button>
+          <button class="chip" data-val="6-9M">6-9M</button>
+          <button class="chip" data-val="9-12M">9-12M</button>
+          <button class="chip" data-val="12-18M">12-18M</button>
+          <button class="chip" data-val="18-24M">18-24M</button>
+          <button class="chip" data-val="2-3Y">2-3Y</button>
+          <button class="chip" data-val="3-4Y">3-4Y</button>
+          <button class="chip" data-val="4-5Y">4-5Y</button>
+          <button class="chip" data-val="5-6Y">5-6Y</button>
+          <button class="chip" data-val="6-7Y">6-7Y</button>
+          <button class="chip" data-val="7-8Y">7-8Y</button>
+        </div>
+        <span class="char-hint">Use Y for years, M for months</span>
+      </div>
+
+      <div class="form-row">
+        <button class="btn btn-update" id="updateStickerBtn">↺ Update Preview</button>
+        <button class="btn btn-add-list" id="addToListBtn">+ Add to List</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ── QUEUE ── -->
+      <div class="sticker-list-header">
+        <span>📋 Sticker Queue</span>
+        <button class="btn-tiny" id="clearAllBtn">Clear All</button>
+      </div>
+      <div class="sticker-list" id="stickerList">
+        <div class="empty-list">No stickers yet.<br/>Import Excel or add manually.</div>
+      </div>
+
+      <!-- SPEC -->
+      <div class="spec-note">
+        <div class="spec-title">📌 Label Specifications</div>
+        <ul>
+          <li>Size: <strong>3cm × 5.5cm</strong></li>
+          <li>Font: <strong>Arial 16pt</strong></li>
+          <li>Bio-degradable material</li>
+          <li>Placed bottom-right of poly bag</li>
+          <li>Sample: <strong>1 sticker per size</strong></li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- RIGHT PANEL -->
+    <section class="preview-panel">
+      <div class="preview-header">
+        <h2>👁️ Live Preview</h2>
+        <div class="preview-controls">
+          <button class="btn btn-sm btn-ghost" id="zoomOutBtn">−</button>
+          <span id="zoomLabel">200%</span>
+          <button class="btn btn-sm btn-ghost" id="zoomInBtn">+</button>
+        </div>
+      </div>
+
+      <div class="preview-stage">
+        <div class="ruler ruler-h">← 50 mm →</div>
+        <div class="ruler ruler-v">↕ 30 mm</div>
+        <div class="sticker-wrapper">
+          <div class="sticker" id="liveSticker">
+            <div class="sticker-field style-name" id="prev-style">JOINED AT THE HIP</div>
+            <div class="sticker-field" id="prev-colour">Dark Navy</div>
+            <div class="sticker-field" id="prev-size">5-6Y</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SHEET PREVIEW -->
+      <div class="sheet-section" id="sheetSection" style="display:none">
+        <div class="sheet-header">
+          <h3>🖨️ Print Sheet Preview</h3>
+          <span class="sheet-info" id="sheetInfo"></span>
+        </div>
+        <div class="print-sheet-preview" id="printSheetPreview"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="printArea"></div>
+  <script src="app.js"></script>
+</body>
+</html>
