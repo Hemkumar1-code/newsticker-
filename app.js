@@ -407,14 +407,14 @@ document.getElementById('downloadPdfBtn').addEventListener('click', () => {
     ['Width   : 50 mm','Height  : 30 mm','Font    : Arial, Size 16','Material: Bio-degradable','Position: Bottom-right of poly bag','Sample  : 1 per size']
       .forEach((l,i) => pdf.text(l, tx, 13+i*3.5));
 
-    // Pages 2+: 2-up left + right same sticker
-    toExport.forEach(s => {
+    // Pages 2+: 2-up consecutive pairs (left=sticker[i], right=sticker[i+1])
+    for (let i = 0; i < toExport.length; i += 2) {
       pdf.addPage([PH, PW], 'landscape');
-      drawSticker(pdf, s, 0);    // Left
-      drawSticker(pdf, s, SW);   // Right
+      drawSticker(pdf, toExport[i], 0);                             // Left
+      if (toExport[i + 1]) drawSticker(pdf, toExport[i + 1], SW);  // Right (if exists)
       pdf.setDrawColor(200); pdf.setLineWidth(0.1);
-      pdf.line(SW, 1, SW, SH-1);
-    });
+      pdf.line(SW, 1, SW, SH - 1);
+    }
 
     const name = toExport[0].style.replace(/\s+/g,'_').substring(0,20);
     const cnt  = toExport.length > 1 ? '_x'+toExport.length : '';
