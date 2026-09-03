@@ -1,4 +1,4 @@
-﻿// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 //  STICKER LABEL GENERATOR  â€“  app.js
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
@@ -112,12 +112,17 @@ function parseExcel(arrayBuffer) {
       if (!styleName) continue;
 
       currentHeader.sizeCols.forEach(sc => {
-        if (hasQty(row[sc.idx])) {
-          results.push({
-            style:  styleName.toUpperCase(),
-            colour: colour || 'â€“',
-            size:   sc.label
-          });
+        let qty = Number(row[sc.idx]) || 0;
+        if (qty > 0) {
+          // Odd qty â†’ round up to even (21â†’22, 35â†’36)
+          if (qty % 2 !== 0) qty += 1;
+          for (let q = 0; q < qty; q++) {
+            results.push({
+              style:  styleName.toUpperCase(),
+              colour: colour || '-',
+              size:   sc.label
+            });
+          }
         }
       });
     }
