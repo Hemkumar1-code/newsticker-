@@ -376,10 +376,7 @@ document.getElementById('downloadPdfBtn').addEventListener('click', () => {
 
     // Draw one sticker at xOffset (0=left, 50=right)
     function drawSticker(pdf, s, xOff) {
-      // Border: 48mm x 28mm (1mm inset from 50x30 edge)
-      pdf.setDrawColor(0); pdf.setLineWidth(0.2);
-      pdf.rect(xOff + 1, 1, 48, 28);
-      // Text
+      // No border - text only
       pdf.setFont('helvetica', 'bold'); pdf.setFontSize(10); pdf.setTextColor(0);
       pdf.text(s.style.toUpperCase(), xOff + 3, 10);
       pdf.setFont('helvetica', 'normal'); pdf.setFontSize(10);
