@@ -373,9 +373,9 @@ document.getElementById('downloadPdfBtn').addEventListener('click', () => {
     const SW = 50, SH = 30, PW = 100, PH = 30;
 
     function drawSticker(pdf, s, xOff) {
-      // Border exactly at 50mm x 30mm boundary
+      // Border: 48mm x 28mm (1mm inset from 50x30 edge)
       pdf.setDrawColor(0); pdf.setLineWidth(0.2);
-      pdf.rect(xOff, 0, SW, SH);
+      pdf.rect(xOff + 1, 1, 48, 28);
       pdf.setFont('helvetica', 'bold'); pdf.setFontSize(10); pdf.setTextColor(0);
       pdf.text(s.style.toUpperCase(), xOff + 3, 10);
       pdf.setFont('helvetica', 'normal'); pdf.setFontSize(10);
