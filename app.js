@@ -362,8 +362,8 @@ function currentPreview() {
 // ══════════════════════════════════════════════════════
 //  PDF DOWNLOAD
 //  Page 1  = Measurement ref (50mm x 30mm)
-//  Page 1  = Measurement ref (50mm x 60mm portrait)
-//  Page 2+ = TOP sticker + BOTTOM sticker (50mm x 60mm portrait)
+//  Page 1  = Measurement ref (100mm x 30mm landscape)
+//  Page 2+ = LEFT sticker | RIGHT sticker (100mm x 30mm landscape)
 // ══════════════════════════════════════════════════════
 document.getElementById('downloadPdfBtn').addEventListener('click', () => {
   const toExport = stickerList.length ? stickerList : currentPreview();
@@ -371,68 +371,69 @@ document.getElementById('downloadPdfBtn').addEventListener('click', () => {
   btn.disabled = true; btn.textContent = 'Generating...';
   try {
     const { jsPDF } = window.jspdf;
-    // Portrait page: 50mm wide x 60mm tall (2 stickers stacked)
-    const SW = 50, SH = 30;   // single sticker
-    const PW = 50, PH = 60;   // page = 2 stickers tall
+    const SW = 50, SH = 30;   // single sticker size
+    const PW = 100, PH = 30;  // page = 2 stickers side by side (landscape)
 
-    // Draw one sticker at yOffset (0=top, 30=bottom)
-    function drawSticker(pdf, s, yOff) {
-      // Border: 48mm x 28mm centred in 50x30 cell (1mm inset)
+    // Draw one sticker at xOffset (0=left, 50=right)
+    function drawSticker(pdf, s, xOff) {
+      // Border: 48mm x 28mm (1mm inset from 50x30 edge)
       pdf.setDrawColor(0); pdf.setLineWidth(0.2);
-      pdf.rect(1, yOff + 1, 48, 28);
+      pdf.rect(xOff + 1, 1, 48, 28);
       // Text
       pdf.setFont('helvetica', 'bold'); pdf.setFontSize(10); pdf.setTextColor(0);
-      pdf.text(s.style.toUpperCase(), 3, yOff + 10);
+      pdf.text(s.style.toUpperCase(), xOff + 3, 10);
       pdf.setFont('helvetica', 'normal'); pdf.setFontSize(10);
-      pdf.text(s.colour, 3, yOff + 18);
-      pdf.text(s.size,   3, yOff + 26);
+      pdf.text(s.colour, xOff + 3, 18);
+      pdf.text(s.size,   xOff + 3, 26);
     }
 
-    // PAGE 1: Measurement Reference (portrait 50x60)
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [PW, PH] });
+    // PAGE 1: Measurement Reference (landscape 100x30)
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [PH, PW] });
     pdf.setFont('helvetica', 'bold'); pdf.setFontSize(5); pdf.setTextColor(60);
-    pdf.text('STICKER LABEL - SIZE REFERENCE', PW / 2, 4, { align: 'center' });
-    pdf.setFontSize(4); pdf.setFont('helvetica','normal');
-    pdf.text('50mm x 30mm per sticker  |  Bio-degradable  |  Arial 16pt', PW/2, 7.5, {align:'center'});
+    pdf.text('STICKER LABEL - SIZE REFERENCE  |  50mm x 30mm', PW / 2, 3, { align: 'center' });
+    pdf.setFontSize(3.5); pdf.setFont('helvetica','normal');
+    pdf.text('Bio-degradable  |  Arial 16pt  |  Border: 48x28mm', PW/2, 6, {align:'center'});
 
-    // Draw ref sticker box
-    const bx=4, by=11, bw=42, bh=20;
+    // Ref sticker box (left half)
+    const bx=8, by=8, bw=34, bh=18;
     pdf.setDrawColor(0); pdf.setLineWidth(0.35); pdf.rect(bx,by,bw,bh);
-    pdf.setFont('helvetica','bold'); pdf.setFontSize(5); pdf.setTextColor(0);
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(4.5); pdf.setTextColor(0);
     pdf.text('STYLE NAME', bx+2, by+5);
-    pdf.setFont('helvetica','normal'); pdf.setFontSize(4.5);
-    pdf.text('Colour', bx+2, by+10);
-    pdf.text('Size',   bx+2, by+15);
+    pdf.setFont('helvetica','normal'); pdf.setFontSize(4);
+    pdf.text('Colour', bx+2, by+9); pdf.text('Size', bx+2, by+14);
 
     // Width arrow
-    const aY = by-3; pdf.setLineWidth(0.2);
+    const aY=by-2.5; pdf.setLineWidth(0.2);
     pdf.line(bx,aY,bx+bw/2-4,aY); pdf.line(bx+bw/2+4,aY,bx+bw,aY);
     pdf.line(bx,aY,bx+1,aY-0.7); pdf.line(bx,aY,bx+1,aY+0.7);
     pdf.line(bx+bw,aY,bx+bw-1,aY-0.7); pdf.line(bx+bw,aY,bx+bw-1,aY+0.7);
-    pdf.setFontSize(4); pdf.setFont('helvetica','bold');
-    pdf.text('50 mm', bx+bw/2, aY+0.8, {align:'center'});
+    pdf.setFontSize(3.5); pdf.setFont('helvetica','bold');
+    pdf.text('50 mm', bx+bw/2, aY+0.7, {align:'center'});
 
     // Height arrow
-    const aX = bx-3;
-    pdf.line(aX,by,aX,by+bh/2-2.5); pdf.line(aX,by+bh/2+2.5,aX,by+bh);
+    const aX=bx-3;
+    pdf.line(aX,by,aX,by+bh/2-2); pdf.line(aX,by+bh/2+2,aX,by+bh);
     pdf.line(aX,by,aX-0.7,by+1); pdf.line(aX,by,aX+0.7,by+1);
     pdf.line(aX,by+bh,aX-0.7,by+bh-1); pdf.line(aX,by+bh,aX+0.7,by+bh-1);
-    pdf.setFontSize(4); pdf.text('30 mm', aX, by+bh/2+0.8, {angle:90, align:'center'});
+    pdf.setFontSize(3.5); pdf.text('30 mm', aX, by+bh/2+0.7, {angle:90, align:'center'});
 
-    // Specs below
-    pdf.setFont('helvetica','normal'); pdf.setFontSize(4); pdf.setTextColor(50);
-    const specs = ['Width   : 50 mm','Height  : 30 mm','Border  : 48 x 28 mm (1mm inset)',
-                   'Font    : Arial, Size 16','Material: Bio-degradable'];
-    specs.forEach((l,i) => pdf.text(l, 5, by+bh+6+i*3.5));
+    // Specs (right half)
+    const tx = SW + 4;
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(4.5); pdf.setTextColor(0);
+    pdf.text('Specifications', tx, 9);
+    pdf.setFont('helvetica','normal'); pdf.setFontSize(3.8); pdf.setTextColor(50);
+    ['Width   : 50 mm','Height  : 30 mm','Border  : 48 x 28 mm',
+     'Font    : Arial 16pt','Material: Bio-degradable']
+      .forEach((l,i) => pdf.text(l, tx, 13+i*3.5));
 
-    // PAGES 2+: TOP + BOTTOM stacked (portrait)
+    // PAGES 2+: LEFT + RIGHT consecutive stickers (landscape)
     for (let i = 0; i < toExport.length; i += 2) {
-      pdf.addPage([PW, PH], 'portrait');
-      drawSticker(pdf, toExport[i], 0);               // TOP sticker
-      if (toExport[i + 1]) drawSticker(pdf, toExport[i + 1], SH);  // BOTTOM sticker
-      // Thin divider line between top and bottom
+      pdf.addPage([PH, PW], 'landscape');
+      drawSticker(pdf, toExport[i], 0);                            // LEFT
+      if (toExport[i + 1]) drawSticker(pdf, toExport[i + 1], SW); // RIGHT
+      // Light divider between left and right
       pdf.setDrawColor(210); pdf.setLineWidth(0.1);
-      pdf.line(1, SH, PW - 1, SH);
+      pdf.line(SW, 1, SW, SH - 1);
     }
 
     const name = toExport[0].style.replace(/\s+/g,'_').substring(0,20);
