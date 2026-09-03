@@ -376,12 +376,12 @@ document.getElementById('downloadPdfBtn').addEventListener('click', () => {
 
     // Draw one sticker at xOffset (0=left, 50=right)
     function drawSticker(pdf, s, xOff) {
-      // Left sticker : rect(1,  1, 49, 28) → x=1  to x=50
-      // Right sticker: rect(50, 1, 49, 28) → x=50 to x=99
-      // Both touch at center (no gap), 1mm outer inset on each side
-      const bx = (xOff === 0) ? 1 : 50;
+      // 5mm gap at center: Left ends at x=47.5, Right starts at x=52.5
+      // Left : rect(1,    1, 46.5, 28) → x=1    to x=47.5
+      // Right: rect(52.5, 1, 46.5, 28) → x=52.5 to x=99
+      const bx = (xOff === 0) ? 1 : 52.5;
       pdf.setDrawColor(0); pdf.setLineWidth(0.2);
-      pdf.rect(bx, 1, 49, 28);
+      pdf.rect(bx, 1, 46.5, 28);
       // Text
       pdf.setFont('helvetica', 'bold'); pdf.setFontSize(10); pdf.setTextColor(0);
       pdf.text(s.style.toUpperCase(), xOff + 3, 10);
